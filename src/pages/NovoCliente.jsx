@@ -40,9 +40,10 @@ export default function NovoCliente() {
     if (!protesto.data_protesto) return setErro('Data do protesto é obrigatória.')
 
     setSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
     const { data: novoCliente, error: errCliente } = await supabase
       .from('clientes')
-      .insert([{ ...cliente }])
+      .insert([{ ...cliente, user_id: user.id }])
       .select()
       .single()
 
