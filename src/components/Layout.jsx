@@ -1,4 +1,9 @@
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+
+async function handleLogout() {
+  await supabase.auth.signOut()
+}
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: '▦' },
@@ -53,8 +58,21 @@ export default function Layout({ children }) {
           ))}
         </nav>
 
-        <div style={{ padding: '0 24px', borderTop: '1px solid var(--border)', paddingTop: 20 }}>
-          <div style={{ fontSize: 11, color: 'var(--text3)' }}>v1.0.0 — protótipo</div>
+        <div style={{ padding: '0 16px', borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ fontSize: 11, color: 'var(--text3)', paddingLeft: 8 }}>v1.0.0 — protótipo</div>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'transparent', border: '1px solid var(--border2)',
+              color: 'var(--text3)', borderRadius: 'var(--radius)',
+              padding: '7px 12px', fontSize: 12, textAlign: 'left',
+              width: '100%',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--red)'; e.currentTarget.style.borderColor = 'rgba(224,92,92,0.4)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
+          >
+            Sair
+          </button>
         </div>
       </aside>
 
