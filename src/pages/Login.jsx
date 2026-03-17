@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 
 export default function Login() {
   const [modo, setModo] = useState('login') // 'login' | 'cadastro'
+  const [usuario, setUsuario] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
@@ -14,6 +15,7 @@ export default function Login() {
     setModo(novoModo)
     setErro('')
     setSucesso('')
+    setUsuario('')
     setSenha('')
     setConfirmarSenha('')
   }
@@ -25,10 +27,15 @@ export default function Login() {
     if (!email.trim() || !senha.trim()) return setErro('Preencha todos os campos.')
 
     if (modo === 'cadastro') {
+      if (!usuario.trim()) return setErro('Nome de usuário é obrigatório.')
       if (senha.length < 6) return setErro('A senha deve ter pelo menos 6 caracteres.')
       if (senha !== confirmarSenha) return setErro('As senhas não coincidem.')
       setLoading(true)
-      const { error } = await supabase.auth.signUp({ email, password: senha })
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: { data: { usuario } },
+      })
       setLoading(false)
       if (error) return setErro(error.message)
       setSucesso('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
@@ -97,6 +104,19 @@ export default function Login() {
           flexDirection: 'column',
           gap: 16,
         }}>
+          {modo === 'cadastro' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Usuário</label>
+              <input
+                type="text"
+                value={usuario}
+                onChange={e => setUsuario(e.target.value)}
+                placeholder="Ex: maria"
+                autoFocus
+              />
+            </div>
+          )}
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em' }}>E-mail</label>
             <input
@@ -104,7 +124,7 @@ export default function Login() {
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="seu@email.com"
-              autoFocus
+              autoFocus={modo === 'login'}
             />
           </div>
 
