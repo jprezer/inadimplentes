@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard.jsx'
 import Clientes from './pages/Clientes.jsx'
 import ClienteDetalhe from './pages/ClienteDetalhe.jsx'
 import NovoCliente from './pages/NovoCliente.jsx'
+import NaoProtestados from './pages/NaoProtestados.jsx'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/clientes/novo" element={<NovoCliente />} />
         <Route path="/clientes/:id" element={<ClienteDetalhe />} />
+        <Route path="/nao-protestados" element={<NaoProtestados />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

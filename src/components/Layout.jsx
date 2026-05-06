@@ -8,6 +8,7 @@ async function handleLogout() {
 const navItems = [
   { to: '/', label: 'Dashboard', icon: '▦' },
   { to: '/clientes', label: 'Inadimplentes', icon: '⚠' },
+  { to: '/nao-protestados', label: 'Não protestados', icon: '◷' },
 ]
 
 export default function Layout({ children }) {
