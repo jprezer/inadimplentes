@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import BoletosModal from '../components/BoletosModal.jsx'
 
 function formatBRL(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0)
@@ -52,6 +53,8 @@ export default function ClienteDetalhe() {
   const [protestos, setProtestos] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalProtesto, setModalProtesto] = useState(false)
+  const [boletosDoProtesto, setBoletosDoProtesto] = useState(null)
+  const [contagensBoletos, setContagensBoletos] = useState({})
   const [editando, setEditando] = useState(false)
   const [saving, setSaving] = useState(false)
   const [erro, setErro] = useState('')
@@ -63,7 +66,18 @@ export default function ClienteDetalhe() {
     const { data: c } = await supabase.from('clientes').select('*').eq('id', id).single()
     const { data: p } = await supabase.from('protestos').select('*').eq('cliente_id', id).order('criado_em', { ascending: false })
     if (c) { setCliente(c); setClienteEdit(c) }
-    if (p) setProtestos(p)
+    if (p) {
+      setProtestos(p)
+      const ids = p.map(x => x.id)
+      if (ids.length) {
+        const { data: bs } = await supabase.from('boletos').select('protesto_id').in('protesto_id', ids)
+        const counts = {}
+        ;(bs || []).forEach(b => { counts[b.protesto_id] = (counts[b.protesto_id] || 0) + 1 })
+        setContagensBoletos(counts)
+      } else {
+        setContagensBoletos({})
+      }
+    }
     setLoading(false)
   }
 
@@ -181,7 +195,7 @@ export default function ClienteDetalhe() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Data', 'Valor', 'Boletos', 'Status', 'Observações', 'Ação'].map(h => (
+                {['Data', 'Valor', 'Boletos', 'Status', 'Observações', 'Ação', 'Anexos'].map(h => (
                   <th key={h} style={{ padding: '9px 20px', textAlign: 'left', fontSize: 11, color: 'var(--text3)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</th>
                 ))}
               </tr>
@@ -202,12 +216,26 @@ export default function ClienteDetalhe() {
                       <option value="quitado">Quitado</option>
                     </select>
                   </td>
+                  <td style={{ padding: '12px 20px' }}>
+                    <button onClick={() => setBoletosDoProtesto(p)}
+                      style={{ background: 'transparent', border: '1px solid var(--border2)', color: 'var(--text2)', padding: '5px 10px', borderRadius: 'var(--radius)', fontSize: 11 }}>
+                      Boletos ({contagensBoletos[p.id] || 0})
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {boletosDoProtesto && (
+        <BoletosModal
+          protesto={boletosDoProtesto}
+          onClose={() => setBoletosDoProtesto(null)}
+          onChange={load}
+        />
+      )}
 
       {/* Modal novo protesto */}
       {modalProtesto && (
