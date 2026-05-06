@@ -11,6 +11,7 @@ function StatusBadge({ status }) {
     ativo: { label: 'Ativo', color: 'var(--red)', bg: 'var(--red-bg)' },
     negociando: { label: 'Negociando', color: 'var(--yellow)', bg: 'var(--yellow-bg)' },
     quitado: { label: 'Quitado', color: 'var(--green)', bg: 'var(--green-bg)' },
+    sem: { label: 'Sem protestos', color: 'var(--text2)', bg: 'var(--bg3)' },
   }
   const s = map[status] || map.ativo
   return (
@@ -61,7 +62,7 @@ export default function Clientes() {
     if (ps.some(p => p.status === 'ativo')) return 'ativo'
     if (ps.some(p => p.status === 'negociando')) return 'negociando'
     if (ps.length > 0) return 'quitado'
-    return 'ativo'
+    return 'sem'
   }
 
   return (
