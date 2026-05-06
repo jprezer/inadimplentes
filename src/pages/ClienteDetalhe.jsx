@@ -121,7 +121,7 @@ export default function ClienteDetalhe() {
   const totalAberto = protestos.filter(p => p.status !== 'quitado').reduce((a, p) => a + Number(p.valor), 0)
 
   return (
-    <div style={{ maxWidth: 760 }}>
+    <div style={{ maxWidth: 1100 }}>
       <div style={{ marginBottom: 24 }}>
         <Link to="/clientes" style={{ fontSize: 12, color: 'var(--text2)' }}>← Voltar</Link>
       </div>
@@ -192,7 +192,8 @@ export default function ClienteDetalhe() {
         {protestos.length === 0 ? (
           <div style={{ padding: 32, textAlign: 'center', color: 'var(--text3)' }}>Nenhum protesto cadastrado.</div>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 880 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 {['Data', 'Valor', 'Boletos', 'Status', 'Observações', 'Ação', 'Anexos'].map(h => (
@@ -226,6 +227,7 @@ export default function ClienteDetalhe() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
