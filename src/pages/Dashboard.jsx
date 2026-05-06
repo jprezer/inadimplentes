@@ -63,16 +63,24 @@ export default function Dashboard() {
         <p style={{ color: 'var(--text2)', fontSize: 13 }}>Visão geral dos protestos em aberto</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 36 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14, marginBottom: 36 }}>
         {cards.map((c, i) => (
           <div key={i} style={{
             background: c.accent ? 'rgba(232,213,163,0.07)' : 'var(--bg2)',
             border: `1px solid ${c.accent ? 'rgba(232,213,163,0.2)' : 'var(--border)'}`,
             borderRadius: 'var(--radius-lg)',
             padding: '20px 22px',
+            minWidth: 0,
           }}>
             <div style={{ fontSize: 11, color: c.accent ? 'var(--accent2)' : 'var(--text2)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{c.label}</div>
-            <div style={{ fontSize: c.accent ? 24 : 28, fontWeight: 600, color: c.accent ? 'var(--accent)' : 'var(--text)', fontFamily: c.accent ? 'var(--mono)' : 'var(--font)' }}>{loading ? '—' : c.value}</div>
+            <div style={{
+              fontSize: c.accent ? 20 : 24,
+              fontWeight: 600,
+              color: c.accent ? 'var(--accent)' : 'var(--text)',
+              fontFamily: c.accent ? 'var(--mono)' : 'var(--font)',
+              wordBreak: 'break-word',
+              lineHeight: 1.15,
+            }}>{loading ? '—' : c.value}</div>
           </div>
         ))}
       </div>

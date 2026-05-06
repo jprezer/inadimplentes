@@ -188,15 +188,15 @@ export default function NaoProtestados() {
       </div>
 
       {/* Resumo */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 20 }}>
         {[
           { label: 'Valor original em aberto', value: formatBRL(totaisAbertos.original) },
           { label: 'Juros acumulados (2%/mês)', value: formatBRL(totaisAbertos.juros), accent: true },
           { label: 'Total atualizado em aberto', value: formatBRL(totaisAbertos.total), accent: true },
         ].map(c => (
-          <div key={c.label} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px 18px' }}>
+          <div key={c.label} style={{ background: 'var(--bg2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px 18px', minWidth: 0 }}>
             <div style={{ fontSize: 11, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{c.label}</div>
-            <div style={{ fontFamily: 'var(--mono)', fontSize: 18, fontWeight: 600, color: c.accent ? 'var(--accent)' : 'var(--text)' }}>{c.value}</div>
+            <div style={{ fontFamily: 'var(--mono)', fontSize: 17, fontWeight: 600, color: c.accent ? 'var(--accent)' : 'var(--text)', wordBreak: 'break-word', lineHeight: 1.15 }}>{c.value}</div>
           </div>
         ))}
       </div>
