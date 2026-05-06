@@ -23,6 +23,25 @@
   --radius-lg: 12px;
 }
 
+:root[data-theme="light"] {
+  --bg: #f6f5f1;
+  --bg2: #ffffff;
+  --bg3: #efece4;
+  --border: #e2ddd0;
+  --border2: #cfc9b8;
+  --text: #1a1a1a;
+  --text2: #5e5e5e;
+  --text3: #9a9a9a;
+  --accent: #8a6d2a;
+  --accent2: #6b531e;
+  --red: #c43d3d;
+  --red-bg: #fbe9e9;
+  --yellow: #a37e10;
+  --yellow-bg: #fbf2d2;
+  --green: #2e8a4d;
+  --green-bg: #e2f3e8;
+}
+
 body {
   font-family: var(--font);
   background: var(--bg);

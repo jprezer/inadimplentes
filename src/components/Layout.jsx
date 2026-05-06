@@ -1,8 +1,14 @@
 import { NavLink } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 async function handleLogout() {
   await supabase.auth.signOut()
+}
+
+function getInitialTheme() {
+  if (typeof window === 'undefined') return 'dark'
+  return localStorage.getItem('theme') || 'dark'
 }
 
 const navItems = [
@@ -12,6 +18,15 @@ const navItems = [
 ]
 
 export default function Layout({ children }) {
+  const [theme, setTheme] = useState(getInitialTheme)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh' }}>
       <aside style={{
@@ -61,6 +76,17 @@ export default function Layout({ children }) {
 
         <div style={{ padding: '0 16px', borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div style={{ fontSize: 11, color: 'var(--text3)', paddingLeft: 8 }}>v1.0.0 — protótipo</div>
+          <button
+            onClick={toggleTheme}
+            style={{
+              background: 'transparent', border: '1px solid var(--border2)',
+              color: 'var(--text2)', borderRadius: 'var(--radius)',
+              padding: '7px 12px', fontSize: 12, textAlign: 'left',
+              width: '100%',
+            }}
+          >
+            {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
+          </button>
           <button
             onClick={handleLogout}
             style={{
