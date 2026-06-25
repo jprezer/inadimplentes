@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Button, Field, Icon } from '../components/ui'
 
 export default function Login() {
-  const [modo, setModo] = useState('login') // 'login' | 'cadastro'
+  const [modo, setModo] = useState('login')
   const [usuario, setUsuario] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -13,17 +14,12 @@ export default function Login() {
 
   function trocarModo(novoModo) {
     setModo(novoModo)
-    setErro('')
-    setSucesso('')
-    setUsuario('')
-    setSenha('')
-    setConfirmarSenha('')
+    setErro(''); setSucesso(''); setUsuario(''); setSenha(''); setConfirmarSenha('')
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setErro('')
-    setSucesso('')
+    setErro(''); setSucesso('')
     if (!email.trim() || !senha.trim()) return setErro('Preencha todos os campos.')
 
     if (modo === 'cadastro') {
@@ -31,11 +27,7 @@ export default function Login() {
       if (senha.length < 6) return setErro('A senha deve ter pelo menos 6 caracteres.')
       if (senha !== confirmarSenha) return setErro('As senhas não coincidem.')
       setLoading(true)
-      const { error } = await supabase.auth.signUp({
-        email,
-        password: senha,
-        options: { data: { usuario } },
-      })
+      const { error } = await supabase.auth.signUp({ email, password: senha, options: { data: { usuario } } })
       setLoading(false)
       if (error) return setErro(error.message)
       setSucesso('Conta criada! Verifique seu e-mail para confirmar o cadastro.')
@@ -49,131 +41,38 @@ export default function Login() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'var(--bg)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
-      <div style={{ width: '100%', maxWidth: 380 }}>
-        <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--accent)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 6 }}>
-            AutoPeças
-          </div>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>
-            Controle de Protestos
-          </div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ width: '100%', maxWidth: 380 }} className="rise">
+        <div style={{ textAlign: 'center', marginBottom: 30 }}>
+          <div className="brand-mark" style={{ width: 48, height: 48, margin: '0 auto 16px' }}><Icon name="shield" size={24} /></div>
+          <h1 style={{ fontSize: 22 }}>Controle de Protestos</h1>
+          <div className="brand-tag" style={{ marginTop: 4 }}>AutoPeças</div>
         </div>
 
-        {/* Toggle login/cadastro */}
-        <div style={{
-          display: 'flex',
-          background: 'var(--bg2)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          padding: 4,
-          marginBottom: 16,
-        }}>
+        <div className="segmented" style={{ marginBottom: 16 }}>
           {['login', 'cadastro'].map(m => (
-            <button
-              key={m}
-              onClick={() => trocarModo(m)}
-              style={{
-                flex: 1,
-                padding: '8px 0',
-                borderRadius: 6,
-                fontSize: 13,
-                fontWeight: 500,
-                background: modo === m ? 'var(--bg3)' : 'transparent',
-                color: modo === m ? 'var(--text)' : 'var(--text3)',
-                border: modo === m ? '1px solid var(--border2)' : '1px solid transparent',
-              }}
-            >
+            <button key={m} onClick={() => trocarModo(m)} className={modo === m ? 'on' : ''}>
               {m === 'login' ? 'Entrar' : 'Criar conta'}
             </button>
           ))}
         </div>
 
-        <form onSubmit={handleSubmit} style={{
-          background: 'var(--bg2)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: 28,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 16,
-        }}>
+        <form onSubmit={handleSubmit} className="card card-pad" style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
           {modo === 'cadastro' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Usuário</label>
-              <input
-                type="text"
-                value={usuario}
-                onChange={e => setUsuario(e.target.value)}
-                placeholder="Ex: maria"
-                autoFocus
-              />
-            </div>
+            <Field label="Usuário"><input type="text" value={usuario} onChange={e => setUsuario(e.target.value)} placeholder="Ex: maria" autoFocus /></Field>
           )}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em' }}>E-mail</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              autoFocus={modo === 'login'}
-            />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Senha</label>
-            <input
-              type="password"
-              value={senha}
-              onChange={e => setSenha(e.target.value)}
-              placeholder="••••••••"
-            />
-          </div>
-
+          <Field label="E-mail"><input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" autoFocus={modo === 'login'} /></Field>
+          <Field label="Senha"><input type="password" value={senha} onChange={e => setSenha(e.target.value)} placeholder="••••••••" /></Field>
           {modo === 'cadastro' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 11, color: 'var(--text2)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Confirmar senha</label>
-              <input
-                type="password"
-                value={confirmarSenha}
-                onChange={e => setConfirmarSenha(e.target.value)}
-                placeholder="••••••••"
-              />
-            </div>
+            <Field label="Confirmar senha"><input type="password" value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)} placeholder="••••••••" /></Field>
           )}
 
-          {erro && (
-            <div style={{ color: 'var(--red)', fontSize: 12, background: 'var(--red-bg)', border: '1px solid rgba(224,92,92,0.3)', borderRadius: 'var(--radius)', padding: '10px 14px' }}>
-              {erro}
-            </div>
-          )}
+          {erro && <div className="alert alert-danger">{erro}</div>}
+          {sucesso && <div className="alert alert-success">{sucesso}</div>}
 
-          {sucesso && (
-            <div style={{ color: 'var(--green)', fontSize: 12, background: 'var(--green-bg)', border: '1px solid rgba(92,184,122,0.3)', borderRadius: 'var(--radius)', padding: '10px 14px' }}>
-              {sucesso}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              background: 'var(--accent)', color: '#0f0f0f',
-              padding: '10px 0', borderRadius: 'var(--radius)',
-              fontWeight: 600, fontSize: 14,
-              opacity: loading ? 0.6 : 1,
-              marginTop: 4,
-            }}>
+          <Button type="submit" variant="primary" disabled={loading} style={{ marginTop: 4, padding: '11px 0' }}>
             {loading ? (modo === 'login' ? 'Entrando...' : 'Criando conta...') : (modo === 'login' ? 'Entrar' : 'Criar conta')}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

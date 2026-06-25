@@ -4,10 +4,10 @@ import { supabase } from './lib/supabase'
 import Layout from './components/Layout.jsx'
 import Login from './pages/Login.jsx'
 import Dashboard from './pages/Dashboard.jsx'
-import Clientes from './pages/Clientes.jsx'
-import ClienteDetalhe from './pages/ClienteDetalhe.jsx'
-import NovoCliente from './pages/NovoCliente.jsx'
-import NaoProtestados from './pages/NaoProtestados.jsx'
+import Devedores from './pages/Devedores.jsx'
+import DevedorDetalhe from './pages/DevedorDetalhe.jsx'
+import NovoDevedor from './pages/NovoDevedor.jsx'
+import Consulta from './pages/Consulta.jsx'
 
 export default function App() {
   const [session, setSession] = useState(undefined)
@@ -28,12 +28,26 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
-        <Route path="/clientes" element={<Clientes />} />
-        <Route path="/clientes/novo" element={<NovoCliente />} />
-        <Route path="/clientes/:id" element={<ClienteDetalhe />} />
-        <Route path="/nao-protestados" element={<NaoProtestados />} />
+        <Route path="/devedores" element={<Devedores />} />
+        <Route path="/devedores/novo" element={<NovoDevedor />} />
+        <Route path="/devedores/:id" element={<DevedorDetalhe />} />
+        <Route path="/consulta" element={<Consulta />} />
+
+        {/* compatibilidade com rotas antigas */}
+        <Route path="/clientes" element={<Navigate to="/devedores" replace />} />
+        <Route path="/clientes/novo" element={<Navigate to="/devedores/novo" replace />} />
+        <Route path="/clientes/:id" element={<RedirectCliente />} />
+        <Route path="/nao-protestados" element={<Navigate to="/devedores?situacao=em_atraso" replace />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>
   )
+}
+
+// /clientes/:id -> /devedores/:id (mesmo id preservado na migração)
+import { useParams } from 'react-router-dom'
+function RedirectCliente() {
+  const { id } = useParams()
+  return <Navigate to={`/devedores/${id}`} replace />
 }

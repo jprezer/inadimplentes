@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { Icon } from './ui'
 
 async function handleLogout() {
   await supabase.auth.signOut()
@@ -12,9 +13,9 @@ function getInitialTheme() {
 }
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: '▦' },
-  { to: '/clientes', label: 'Inadimplentes', icon: '⚠' },
-  { to: '/nao-protestados', label: 'Não protestados', icon: '◷' },
+  { to: '/', label: 'Painel', icon: 'dashboard', exact: true },
+  { to: '/devedores', label: 'Devedores', icon: 'users', group: 'Cobranças' },
+  { to: '/consulta', label: 'Consulta', icon: 'search', sub: 'na venda' },
 ]
 
 export default function Layout({ children }) {
@@ -25,87 +26,53 @@ export default function Layout({ children }) {
     localStorage.setItem('theme', theme)
   }, [theme])
 
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark')
+  const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'))
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
-      <aside style={{
-        width: 220,
-        background: 'var(--bg2)',
-        borderRight: '1px solid var(--border)',
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '28px 0',
-        position: 'fixed',
-        top: 0, left: 0, bottom: 0,
-        zIndex: 10,
-      }}>
-        <div style={{ padding: '0 24px 32px' }}>
-          <div style={{
-            fontFamily: 'var(--mono)',
-            fontSize: 11,
-            color: 'var(--accent)',
-            letterSpacing: '0.15em',
-            textTransform: 'uppercase',
-            marginBottom: 4,
-          }}>AutoPeças</div>
-          <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
-            Controle de Protestos
+    <div className="app">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-mark"><Icon name="shield" /></div>
+          <div>
+            <div className="brand-name">Controle de<br />Protestos</div>
+            <div className="brand-tag">AutoPeças</div>
           </div>
         </div>
 
-        <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <nav className="nav">
           {navItems.map(item => (
-            <NavLink key={item.to} to={item.to} end={item.to === '/'} style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '9px 12px',
-              borderRadius: 'var(--radius)',
-              color: isActive ? 'var(--accent)' : 'var(--text2)',
-              background: isActive ? 'rgba(232,213,163,0.08)' : 'transparent',
-              fontWeight: isActive ? 500 : 400,
-              fontSize: 13.5,
-              transition: 'all 0.15s',
-            })}>
-              <span style={{ fontSize: 13 }}>{item.icon}</span>
-              {item.label}
-            </NavLink>
+            <div key={item.to} style={{ display: 'contents' }}>
+              {item.group && <div className="nav-label">{item.group}</div>}
+              <NavLink
+                to={item.to}
+                end={item.exact}
+                className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
+              >
+                <Icon name={item.icon} />
+                {item.label}
+                {item.sub && <span className="nav-sub">{item.sub}</span>}
+              </NavLink>
+            </div>
           ))}
         </nav>
 
-        <div style={{ padding: '0 16px', borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 11, color: 'var(--text3)', paddingLeft: 8 }}>v1.0.0 — protótipo</div>
-          <button
-            onClick={toggleTheme}
-            style={{
-              background: 'transparent', border: '1px solid var(--border2)',
-              color: 'var(--text2)', borderRadius: 'var(--radius)',
-              padding: '7px 12px', fontSize: 12, textAlign: 'left',
-              width: '100%',
-            }}
-          >
+        <div className="sidebar-foot">
+          <div className="foot-meta">
+            <span>v1.0.0</span>
+            <span>protótipo</span>
+          </div>
+          <button className="icon-btn" onClick={toggleTheme}>
+            <Icon name={theme === 'dark' ? 'sun' : 'moon'} />
             {theme === 'dark' ? 'Tema claro' : 'Tema escuro'}
           </button>
-          <button
-            onClick={handleLogout}
-            style={{
-              background: 'transparent', border: '1px solid var(--border2)',
-              color: 'var(--text3)', borderRadius: 'var(--radius)',
-              padding: '7px 12px', fontSize: 12, textAlign: 'left',
-              width: '100%',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'var(--red)'; e.currentTarget.style.borderColor = 'rgba(224,92,92,0.4)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text3)'; e.currentTarget.style.borderColor = 'var(--border2)' }}
-          >
+          <button className="icon-btn danger" onClick={handleLogout}>
+            <Icon name="logout" />
             Sair
           </button>
         </div>
       </aside>
 
-      <main style={{ marginLeft: 220, flex: 1, padding: '36px 40px', maxWidth: 'calc(100vw - 220px)' }}>
-        {children}
-      </main>
+      <main className="main">{children}</main>
     </div>
   )
 }
