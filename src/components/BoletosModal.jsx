@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatBRL, formatData } from '../lib/format'
-import { Button, Field, Modal, Loading, EmptyState } from './ui'
+import { Button, Field, Modal, Loading, EmptyState, Icon } from './ui'
 
 const BUCKET = 'boletos'
-const FORM_VAZIO = { vencimento: '', codigo_barras: '', valor: '', arquivo: null }
+const FORM_VAZIO = { codigo_barras: '', arquivo: null }
 
 export default function BoletosModal({ divida, onClose, onChange }) {
-  const [boletos, setBoletos] = useState([])
+  const [comprovantes, setComprovantes] = useState([])
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState(FORM_VAZIO)
   const [saving, setSaving] = useState(false)
@@ -18,8 +18,8 @@ export default function BoletosModal({ divida, onClose, onChange }) {
       .from('boletos')
       .select('*')
       .eq('divida_id', divida.id)
-      .order('vencimento', { ascending: true, nullsFirst: false })
-    if (data) setBoletos(data)
+      .order('criado_em', { ascending: true })
+    if (data) setComprovantes(data)
     setLoading(false)
   }
 
@@ -27,8 +27,8 @@ export default function BoletosModal({ divida, onClose, onChange }) {
 
   async function salvar() {
     setErro('')
-    if (!form.vencimento && !form.codigo_barras && !form.arquivo) {
-      return setErro('Informe ao menos vencimento, código de barras ou arquivo.')
+    if (!form.arquivo && !form.codigo_barras.trim()) {
+      return setErro('Anexe o arquivo do boleto ou informe a linha digitável.')
     }
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -46,12 +46,12 @@ export default function BoletosModal({ divida, onClose, onChange }) {
       }
     }
 
+    // valor/vencimento ficam nulos: o comprovante é só o documento, quem define
+    // o valor e o vencimento é a própria dívida.
     const payload = {
       divida_id: divida.id,
       user_id: user.id,
-      vencimento: form.vencimento || null,
       codigo_barras: form.codigo_barras.trim() || null,
-      valor: form.valor ? Number(form.valor) : null,
       arquivo_path,
       arquivo_nome,
     }
@@ -62,14 +62,14 @@ export default function BoletosModal({ divida, onClose, onChange }) {
       return setErro(error.message)
     }
     setForm(FORM_VAZIO)
-    const input = document.getElementById('boleto-arquivo-input')
+    const input = document.getElementById('comprovante-arquivo-input')
     if (input) input.value = ''
     load()
     onChange?.()
   }
 
   async function excluir(b) {
-    if (!confirm('Excluir este boleto?')) return
+    if (!confirm('Excluir este comprovante?')) return
     if (b.arquivo_path) await supabase.storage.from(BUCKET).remove([b.arquivo_path])
     await supabase.from('boletos').delete().eq('id', b.id)
     load()
@@ -84,51 +84,56 @@ export default function BoletosModal({ divida, onClose, onChange }) {
   }
 
   return (
-    <Modal title="Comprovantes da dívida" onClose={onClose} width={720}>
-      <div className="muted" style={{ fontSize: 12.5, marginTop: -6, marginBottom: 18 }}>
+    <Modal title="Comprovantes da dívida" onClose={onClose} width={640}>
+      <div className="muted" style={{ fontSize: 12.5, marginTop: -6, marginBottom: 4 }}>
         {divida.descricao ? divida.descricao + ' · ' : ''}{formatBRL(divida.valor)} · vence {formatData(divida.data_vencimento)}
       </div>
+      <p className="dim" style={{ fontSize: 12, marginBottom: 18 }}>
+        Anexe aqui os boletos/documentos que comprovam esta dívida. Eles são apenas arquivos de apoio — não alteram o valor da dívida.
+      </p>
 
-      {/* Form novo boleto */}
+      {/* Anexar comprovante */}
       <div className="card card-pad" style={{ background: 'var(--surface-2)', marginBottom: 18 }}>
-        <div className="eyebrow" style={{ color: 'var(--accent-2)', marginBottom: 14 }}>Adicionar boleto</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 12 }}>
-          <Field label="Vencimento"><input type="date" value={form.vencimento} onChange={e => setForm(p => ({ ...p, vencimento: e.target.value }))} /></Field>
-          <Field label="Valor (R$)"><input type="number" step="0.01" min="0" value={form.valor} onChange={e => setForm(p => ({ ...p, valor: e.target.value }))} placeholder="0,00" /></Field>
-          <Field label="Arquivo (PDF/img)"><input id="boleto-arquivo-input" type="file" accept="application/pdf,image/*" onChange={e => setForm(p => ({ ...p, arquivo: e.target.files?.[0] || null }))} /></Field>
-        </div>
-        <Field label="Código de barras / linha digitável">
+        <div className="eyebrow" style={{ color: 'var(--accent-2)', marginBottom: 14 }}>Anexar comprovante</div>
+        <Field label="Arquivo do boleto (PDF ou imagem)">
+          <input id="comprovante-arquivo-input" type="file" accept="application/pdf,image/*"
+            onChange={e => setForm(p => ({ ...p, arquivo: e.target.files?.[0] || null }))} />
+        </Field>
+        <div style={{ height: 12 }} />
+        <Field label="Linha digitável / código de barras (opcional)">
           <input value={form.codigo_barras} onChange={e => setForm(p => ({ ...p, codigo_barras: e.target.value }))}
             placeholder="00000.00000 00000.000000 00000.000000 0 00000000000000"
             style={{ fontFamily: 'var(--mono)', fontSize: 12 }} />
         </Field>
         {erro && <div className="alert alert-danger" style={{ marginTop: 10 }}>{erro}</div>}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-          <Button variant="primary" size="sm" icon="plus" onClick={salvar} disabled={saving}>{saving ? 'Salvando...' : 'Adicionar boleto'}</Button>
+          <Button variant="primary" size="sm" icon="plus" onClick={salvar} disabled={saving}>{saving ? 'Salvando...' : 'Anexar comprovante'}</Button>
         </div>
       </div>
 
       {loading ? (
         <Loading />
-      ) : boletos.length === 0 ? (
-        <EmptyState icon="paperclip" title="Nenhum boleto">Nenhum boleto anexado a este protesto.</EmptyState>
+      ) : comprovantes.length === 0 ? (
+        <EmptyState icon="paperclip" title="Nenhum comprovante">Nenhum documento anexado a esta dívida ainda.</EmptyState>
       ) : (
         <div className="table-wrap">
           <table className="data">
             <thead>
-              <tr><th>Vencimento</th><th className="num">Valor</th><th>Código de barras</th><th>Arquivo</th><th></th></tr>
+              <tr><th>Documento</th><th>Linha digitável</th><th></th></tr>
             </thead>
             <tbody>
-              {boletos.map(b => (
+              {comprovantes.map(b => (
                 <tr key={b.id}>
-                  <td className="num cell-muted" style={{ fontSize: 12.5 }}>{formatData(b.vencimento)}</td>
-                  <td className="num cell-strong">{b.valor ? formatBRL(b.valor) : '—'}</td>
-                  <td className="num cell-muted cell-truncate" style={{ fontSize: 11.5, maxWidth: 220 }} title={b.codigo_barras || ''}>{b.codigo_barras || '—'}</td>
                   <td>
-                    {b.arquivo_path
-                      ? <Button size="sm" icon="open" onClick={() => abrirArquivo(b)}>Abrir</Button>
-                      : <span className="dim">—</span>}
+                    {b.arquivo_path ? (
+                      <button className="link-doc" onClick={() => abrirArquivo(b)} title="Abrir arquivo">
+                        <Icon name="paperclip" size={13} />
+                        <span className="cell-truncate" style={{ maxWidth: 200 }}>{b.arquivo_nome || 'arquivo'}</span>
+                        <Icon name="open" size={12} />
+                      </button>
+                    ) : <span className="dim">Sem arquivo</span>}
                   </td>
+                  <td className="num cell-muted cell-truncate" style={{ fontSize: 11.5, maxWidth: 220 }} title={b.codigo_barras || ''}>{b.codigo_barras || '—'}</td>
                   <td><Button size="sm" variant="danger" icon="trash" onClick={() => excluir(b)} /></td>
                 </tr>
               ))}

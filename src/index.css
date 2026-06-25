@@ -279,6 +279,8 @@ td.num, th.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .cell-accent { color: var(--accent); font-weight: 600; }
 .cell-truncate { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row-chevron { color: var(--text-3); transition: transform 0.15s, color 0.15s; }
+.link-doc { display: inline-flex; align-items: center; gap: 7px; background: transparent; border: none; color: var(--accent); font-size: 13px; font-weight: 500; cursor: pointer; padding: 0; max-width: 100%; }
+.link-doc:hover { text-decoration: underline; }
 tr.clickable:hover .row-chevron { color: var(--accent); transform: translateX(2px); }
 
 /* ---------- Linha de dívida (detalhe do devedor) ---------- */
